@@ -1,0 +1,61 @@
+import random
+import torch
+import os
+import numpy as np
+import cv2
+
+
+def set_seed(seed=1000):
+    """
+    Sets the seed for reproducibility
+
+    Args:
+        seed (int, optional): Input seed. Defaults to 1000.
+    """
+    if seed:
+        print(f'Setting random seed {seed}')
+        random.seed(seed)
+        os.environ['PYTHONHASHSEED'] = str(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+
+        cuda_available = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        if cuda_available:
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
+    else:
+        pass
+
+
+def preprocess_img(img_dir, channels=3):
+    if channels == 1:
+        img = cv2.imread(img_dir, 0)
+    elif channels == 3:
+        img = cv2.imread(img_dir)
+
+    shape_r = 288
+    shape_c = 384
+    img_padded = np.ones((shape_r, shape_c, channels), dtype=np.uint8)
+    if channels == 1:
+        img_padded = np.zeros((shape_r, shape_c), dtype=np.uint8)
+    original_shape = img.shape
+    rows_rate = original_shape[0] / shape_r
+    cols_rate = original_shape[1] / shape_c
+    if rows_rate > cols_rate:
+        new_cols = (original_shape[1] * shape_r) // original_shape[0]
+        img = cv2.resize(img, (new_cols, shape_r))
+        if new_cols > shape_c:
+            new_cols = shape_c
+        img_padded[:, ((img_padded.shape[1] - new_cols) // 2):((img_padded.shape[1] - new_cols) // 2 + new_cols)] = img
+    else:
+        new_rows = (original_shape[0] * shape_c) // original_shape[1]
+        img = cv2.resize(img, (shape_c, new_rows))
+
+        if new_rows > shape_r:
+            new_rows = shape_r
+        img_padded[((img_padded.shape[0] - new_rows) // 2):((img_padded.shape[0] - new_rows) // 2 + new_rows), :] = img
+
+    return img_padded
