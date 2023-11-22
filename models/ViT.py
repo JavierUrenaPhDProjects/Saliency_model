@@ -204,8 +204,18 @@ def vit_large(args, **kwargs):
 
 if __name__ == '__main__':
     args = {'img_size': 384}
-    model = vit_base(args)
-    x = torch.randn(1, 3, 288, 384)
+    model = ViT(
+        image_size=384,
+        patch_size=32,
+        num_classes=276,
+        dim=1024,
+        depth=6,
+        heads=16,
+        mlp_dim=2048,
+        dropout=0.1,
+        emb_dropout=0.1
+    )
+    x = torch.randn(1, 3, 384, 384)
     y = model(x)
 
-    print(y)
+    print(y.shape)

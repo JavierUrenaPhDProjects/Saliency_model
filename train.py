@@ -3,7 +3,7 @@ from toolbox.dataloader import create_dataloader, create_dataset
 from toolbox.models_utils import load_model, save_model, evaluation
 from toolbox.utils import set_seed
 from torch import nn, autocast
-from torcheval.metrics import BinaryAccuracy, BinaryF1Score
+from torcheval.metrics import MulticlassAUROC
 from tqdm import tqdm
 import torch.optim as optim
 
@@ -33,7 +33,7 @@ def AMP_step(x1, x2, gt, model, optimizer, loss_fn, scaler):
 # Training script:
 
 def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args, output_batches=True,
-          nBatchesOutput=100, max_tries=10):
+          nBatchesOutput=5, max_tries=10):
     device = args['device']
     epochs = args['epochs']
 
@@ -66,12 +66,12 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
 
             if output_batches and i % nBatchesOutput == nBatchesOutput - 1:
                 print(f'Epoch {epoch + 1}, batches {i - (nBatchesOutput - 1)} '
-                      f'to {i} average loss (MSE): {running_loss / (nBatchesOutput - 1)}')
+                      f'to {i} average loss (BCE): {running_loss / (nBatchesOutput - 1)}')
                 # zero the loss
                 running_loss = 0.0
 
         eval_score = evaluation(model, val_loader, metric)
-        print(f'Epoch {epoch + 1}, | F1 score {eval_score}')
+        print(f'Epoch {epoch + 1}, | Area Under ROC {eval_score}')
 
         if eval_score > best_score:
             save_model(model, args)
@@ -95,8 +95,8 @@ if __name__ == '__main__':
 
     model = load_model(model_name=args['model'], args=args)
     loss_fn = nn.CrossEntropyLoss()
-    metric = BinaryF1Score()
-    optimizer = optim.SGD(model.parameters(), lr=args['lr'], momentum=0.9)
+    metric = MulticlassAUROC(num_classes=257)
+    optimizer = optim.SGD(model.parameters(), lr=args['lr'], momentum=0.9, weight_decay=args['weight_decay'])
     scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=args['lr'], max_lr=0.1)
 
     print('\n---------------------\nTraining model\n---------------------')

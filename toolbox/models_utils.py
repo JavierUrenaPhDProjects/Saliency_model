@@ -64,7 +64,8 @@ def evaluation(model, val_loader, metric):
             images, saliencies, labels = images.to(device), saliencies.to(device), labels.to(device)
             pred = model(images, saliencies)
 
-            labels, pred = labels.argmax(dim=1), pred.argmax(dim=1)
-            metric.update(labels, pred)
+            # labels, pred = labels.argmax(dim=1), pred.argmax(dim=1)
+            labels_parsed = labels.argmax(dim=1)
+            metric.update(pred, labels_parsed)
 
     return metric.compute()

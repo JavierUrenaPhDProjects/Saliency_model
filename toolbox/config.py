@@ -46,6 +46,7 @@ parser.add_argument('--dataset_path', default=data_path, type=str)
 
 # TRAINING PARAMETERS #
 parser.add_argument('--lr', default=0.001, type=float)
+parser.add_argument('--weight_decay', default=0.0001, type=float)
 parser.add_argument('--batch_size', default=2, type=int)
 parser.add_argument('--train_percnt', default=0.8, type=float)
 parser.add_argument('--epochs', default=5, type=int)
@@ -55,7 +56,7 @@ parser.add_argument('--model', default='SalClass_crossmod_mode1', type=str)
 parser.add_argument('--img_size', default=384, type=int)
 parser.add_argument('--pretrain', default=False, type=str2bool)
 parser.add_argument('--dropout', default=0.0001, type=float)
-
+parser.add_argument('--model_checkpoint', default='last_trained_SalClass_crossmod_mode1_CALTECH256.pth', type=str)
 return_args = parser.parse_args()
 
 
