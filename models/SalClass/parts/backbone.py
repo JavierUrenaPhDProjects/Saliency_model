@@ -11,6 +11,8 @@ class resnet_backbone(nn.Module):
         super().__init__()
         self.backbone = resnet50(weights='ResNet50_Weights.DEFAULT').to(dtype=torch.float64)
         del self.backbone.fc
+        for param in self.backbone.parameters():
+            param.requires_grad = False
 
     def forward(self, inputs):
         # propagate inputs through ResNet-50 up to avg-pool layer
