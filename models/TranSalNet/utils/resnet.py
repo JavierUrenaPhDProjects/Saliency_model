@@ -294,7 +294,7 @@ def _resnet(
     if pretrained:
         if arch == 'resnet50':
             state_dict = torch.load(
-                r'/home/javier/Pycharm/PycharmProjects/Saliency_model/trained/TranSalNet_Res/resnet50-0676ba61.pth')
+                r'/trained_models/TranSalNet_Res/resnet50-0676ba61.pth')
         # else:
         #     state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
         model.load_state_dict(state_dict)
@@ -306,7 +306,7 @@ def resnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> 
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet("resnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
@@ -317,7 +317,7 @@ def resnet34(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> 
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet("resnet34", BasicBlock, [3, 4, 6, 3], pretrained, progress, **kwargs)
@@ -328,7 +328,7 @@ def resnet50(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> 
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet("resnet50", Bottleneck, [3, 4, 6, 3], pretrained, progress, **kwargs)
@@ -339,7 +339,7 @@ def resnet101(pretrained: bool = False, progress: bool = True, **kwargs: Any) ->
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet("resnet101", Bottleneck, [3, 4, 23, 3], pretrained, progress, **kwargs)
@@ -350,7 +350,7 @@ def resnet152(pretrained: bool = False, progress: bool = True, **kwargs: Any) ->
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet("resnet152", Bottleneck, [3, 8, 36, 3], pretrained, progress, **kwargs)
@@ -361,7 +361,7 @@ def resnext50_32x4d(pretrained: bool = False, progress: bool = True, **kwargs: A
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     kwargs["groups"] = 32
@@ -374,7 +374,7 @@ def resnext101_32x8d(pretrained: bool = False, progress: bool = True, **kwargs: 
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     kwargs["groups"] = 32
@@ -392,7 +392,7 @@ def wide_resnet50_2(pretrained: bool = False, progress: bool = True, **kwargs: A
     channels, and in Wide ResNet-50-2 has 2048-1024-2048.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     kwargs["width_per_group"] = 64 * 2
@@ -409,7 +409,7 @@ def wide_resnet101_2(pretrained: bool = False, progress: bool = True, **kwargs: 
     channels, and in Wide ResNet-50-2 has 2048-1024-2048.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     kwargs["width_per_group"] = 64 * 2

@@ -166,7 +166,7 @@ class TransEncoder(nn.Module):
 def TranSalNet_Res(args):
     model = TranSalNet()
     checkpoint = torch.load(
-        r'/home/javier/Pycharm/PycharmProjects/Saliency_model/trained/TranSalNet_Res/TranSalNet_Res.pth',
+        r'/trained_models/TranSalNet_Res/TranSalNet_Res.pth',
         map_location=torch.device(args['device']))
     model.load_state_dict(checkpoint, strict=False)
     model.to(torch.float64)

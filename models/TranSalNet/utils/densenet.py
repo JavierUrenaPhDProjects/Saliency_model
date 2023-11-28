@@ -205,7 +205,7 @@ def _load_state_dict(model, model_url, progress, flag):
         r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
     if flag == "densenet161":
         state_dict = torch.load(
-            r'/home/javier/Pycharm/PycharmProjects/Saliency_model/trained/TranSalNet_Dense/densenet161-8d451a50.pth')
+            r'/trained_models/TranSalNet_Dense/densenet161-8d451a50.pth')
     # else:
     #     state_dict = load_state_dict_from_url(model_url, progress=progress)
     for key in list(state_dict.keys()):
@@ -233,7 +233,7 @@ def densenet121(pretrained=False, progress=True, **kwargs):
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
         memory_efficient (bool) - If True, uses checkpointing. Much more memory efficient,
           but slower. Default: *False*. See `"paper" <https://arxiv.org/pdf/1707.06990.pdf>`_
@@ -247,7 +247,7 @@ def densenet161(pretrained=False, progress=True, **kwargs):
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
         memory_efficient (bool) - If True, uses checkpointing. Much more memory efficient,
           but slower. Default: *False*. See `"paper" <https://arxiv.org/pdf/1707.06990.pdf>`_
@@ -261,7 +261,7 @@ def densenet169(pretrained=False, progress=True, **kwargs):
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
         memory_efficient (bool) - If True, uses checkpointing. Much more memory efficient,
           but slower. Default: *False*. See `"paper" <https://arxiv.org/pdf/1707.06990.pdf>`_
@@ -275,7 +275,7 @@ def densenet201(pretrained=False, progress=True, **kwargs):
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a model pre-trained_models on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
         memory_efficient (bool) - If True, uses checkpointing. Much more memory efficient,
           but slower. Default: *False*. See `"paper" <https://arxiv.org/pdf/1707.06990.pdf>`_

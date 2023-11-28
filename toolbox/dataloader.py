@@ -28,8 +28,8 @@ def create_dataloader(dataset, args):
     datasetSize = len(dataset)
     trainsize, testsize = int(trainPercnt * datasetSize), datasetSize - int(trainPercnt * datasetSize)
     train_dataset, test_dataset = random_split(dataset, [trainsize, testsize])
-    train_loader = DataLoader(train_dataset, batch_size=batchSize, shuffle=True, num_workers=4, pin_memory=True)
-    test_loader = DataLoader(test_dataset, batch_size=batchSize, shuffle=False, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=batchSize, shuffle=True, num_workers=0, pin_memory=True)
+    test_loader = DataLoader(test_dataset, batch_size=batchSize, shuffle=False, num_workers=0, pin_memory=True)
     return train_loader, test_loader
 
 
