@@ -13,7 +13,7 @@ class SalClass(nn.Module):
 
     def forward(self, x1, x2):
         x = self.vit(x1, x2)
-        x = self.final(x)
+        # x = self.final(x)
 
         return x
 

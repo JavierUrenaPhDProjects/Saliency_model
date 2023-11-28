@@ -16,7 +16,7 @@ class SalClass(nn.Module):
     def forward(self, x1, x2):
         x = self.backbone(x1, x2)
         x = self.vit(x)
-        x = self.final(x)
+        # x = self.final(x)
         # x = x.argmax(dim=1).unsqueeze(dim=1)
         return x
 

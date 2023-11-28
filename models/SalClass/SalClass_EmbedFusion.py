@@ -13,6 +13,7 @@ class SalClass(nn.Module):
                  mlp_dim=2048, dropout=0.1, emb_dropout=0.1):
         super().__init__()
         self.backbone = resnet_backbone()
+        self.backbone.eval()
         self.vit = ViT(emb_shape, patch_size, num_classes, dim, depth, heads, mlp_dim,
                        channels=channels, dropout=dropout, emb_dropout=emb_dropout)
         self.vit.double()
@@ -23,9 +24,12 @@ class SalClass(nn.Module):
         :param x1: this should be the image
         :param x2: this should be the saliency
         """
-        try:
-            assert x2.shape[1] == 3
-        except:
+        # try:
+        #     assert x2.shape[1] == 3
+        # except:
+        #     x2 = torch.cat((x2, x2, x2), dim=1)
+
+        if x2.shape[1] != 3:
             x2 = torch.cat((x2, x2, x2), dim=1)
 
         x1 = self.backbone(x1)
@@ -34,7 +38,7 @@ class SalClass(nn.Module):
         x = x1 + x2
 
         x = self.vit(x)
-        x = self.final(x)
+        # x = self.final(x)
         return x
 
 
