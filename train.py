@@ -1,7 +1,9 @@
+import numpy as np
+
 from toolbox.config import load_args
 from toolbox.dataloader import create_dataloader, create_dataset
 from toolbox.models_utils import load_model, save_model, evaluation
-from toolbox.utils import set_seed
+from toolbox.utils import set_seed, start_logging, save_log, get_batch_loss
 from torch import nn, autocast
 from torcheval.metrics import MulticlassAUROC
 from tqdm import tqdm
@@ -33,9 +35,11 @@ def AMP_step(x1, x2, gt, model, optimizer, loss_fn, scaler):
 # Training script:
 
 def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args, output_batches=True,
-          nBatchesOutput=5, max_tries=10):
+          nBatchesOutput=100, max_tries=10):
     device = args['device']
     epochs = args['epochs']
+
+    start_logging(args)
 
     AMP_flag = False
     if device != 'cpu':
@@ -54,6 +58,8 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
         print(f'\nCurrent Learning Rate of the training: {optimizer.param_groups[0]["lr"]}')
         model.train()
         running_loss = 0.0
+        loss_array = []
+
         for i, (images, saliencies, labels) in tqdm(enumerate(train_loader), total=len(train_loader)):
             images, saliencies, labels = images.to(device), saliencies.to(device), labels.to(device)
 
@@ -62,7 +68,10 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
             else:
                 loss = step(images, saliencies, labels, model, optimizer, loss_fn)
 
-            running_loss += loss.detach().item()
+            loss_value = loss.detach().item()
+            running_loss += loss_value
+            loss_array = np.append(loss_array, loss_value)
+            get_batch_loss(args, [loss_value])
 
             if output_batches and i % nBatchesOutput == nBatchesOutput - 1:
                 print(f'Epoch {epoch + 1}, batches {i - (nBatchesOutput - 1)} '
@@ -72,6 +81,7 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
 
         eval_score = evaluation(model, val_loader, metric)
         print(f'Epoch {epoch + 1}, | Area Under ROC {eval_score}')
+        save_log(args, epoch, loss_array, eval_score)
 
         if eval_score > best_score:
             save_model(model, args)
@@ -112,6 +122,5 @@ if __name__ == '__main__':
           f'\nBatch size: {args["batch_size"]}'
           f'\nLearning rate: {args["lr"]}'
           f'\nNumber of epochs: {args["epochs"]}')
-
     print('---------------------')
     train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args)
