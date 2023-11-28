@@ -1,7 +1,5 @@
 import os
-
 import torch.cuda
-
 from models.SalClass.SalClass_BruteFussion import *
 from models.SalClass.SalClass_EmbedFusion import *
 from models.SalClass.SalClass_CrossModal import *
@@ -18,6 +16,7 @@ def load_model(model_name, args):
             ckpt_file = f'last_trained_{model_name}_{args["dataset"]}.pth'
 
         print(f'Loading pre-trained model of {model_name}. Checkpoint: {ckpt_file}')
+
         try:
             checkpoint = torch.load(
                 f'./trained_models/{model_name}/{ckpt_file}',
@@ -44,7 +43,7 @@ def save_model(model, args):
     today = datetime.date.today().strftime("%d-%m-%Y")
     name = args['model']
     dataset = args['dataset']
-    path = f"trained/{name}"
+    path = f"trained_models/{name}"
 
     if not os.path.exists(path):
         os.mkdir(path)
@@ -68,4 +67,5 @@ def evaluation(model, val_loader, metric):
             labels_parsed = labels.argmax(dim=1)
             metric.update(pred, labels_parsed)
 
-    return metric.compute()
+    result = metric.compute()
+    return result.detach().item()
