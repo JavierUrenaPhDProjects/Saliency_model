@@ -2,6 +2,7 @@ import random
 import torch
 import os
 import numpy as np
+import pandas as pd
 import cv2
 
 
@@ -59,3 +60,54 @@ def preprocess_img(img_dir, channels=3):
         img_padded[((img_padded.shape[0] - new_rows) // 2):((img_padded.shape[0] - new_rows) // 2 + new_rows), :] = img
 
     return img_padded
+
+
+def start_logging(args):
+    model_name = args['model']
+    date = args['date']
+    dataset = args['dataset']
+
+    logs_path = os.path.join("trained_models", model_name, "logs")
+    log_filename = f"{model_name}_{dataset}_{date}.csv"
+    filepath = os.path.join(logs_path, log_filename)
+
+    if not os.path.exists(logs_path):
+        os.mkdir(logs_path)
+    elif os.path.exists(filepath):
+        os.remove(filepath)
+    log_df = pd.DataFrame({'epoch': [], 'loss': [], 'eval_score': []})
+    log_df.to_csv(filepath, index=False)
+
+
+def get_epoch_log(epoch, loss_array, eval_score):
+    log_dict = {'epoch': epoch,
+                'loss': np.average(loss_array),
+                'eval_score': eval_score}
+    return log_dict
+
+
+def save_log(args, epoch, loss_array, eval_scor):
+    log_dict = get_epoch_log(epoch, loss_array, eval_scor)
+
+    model_name = args['model']
+    date = args['date']
+    dataset = args['dataset']
+
+    logs_path = os.path.join("trained_models", model_name, "logs")
+    log_filename = f"{model_name}_{dataset}_{date}.csv"
+    filepath = os.path.join(logs_path, log_filename)
+
+    log_df = pd.read_csv(filepath)
+    new_log = pd.DataFrame(log_dict, index=[0])
+    log_df = log_df._append(new_log, ignore_index=True)
+    log_df.to_csv(filepath, index=False)
+
+
+def get_batch_loss(args, loss):
+    model_name = args['model']
+    logs_path = os.path.join("trained_models", model_name, "logs")
+    filepath = os.path.join(logs_path, 'loss.npy')
+    if not os.path.exists(filepath):
+        np.save(filepath, [])
+    loss_array = np.load(filepath)
+    np.save(filepath, np.append(loss_array, loss))
