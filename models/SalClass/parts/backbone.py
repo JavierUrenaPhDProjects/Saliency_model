@@ -32,14 +32,14 @@ class resnet_backbone(nn.Module):
 class medium_cnn(nn.Module):
     def __init__(self, n_channels=3):
         super().__init__()
-        self.stage1 = nn.Sequential(nn.Conv2d(n_channels, 32, kernel_size=3, padding=1),
+        self.stage1 = nn.Sequential(nn.Conv2d(n_channels, 32, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(),
                                     nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(),
                                     nn.MaxPool2d(2, 2)).to(dtype=torch.float64)
-        self.stage2 = nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+        self.stage2 = nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
                                     nn.ReLU(),
-                                    nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+                                    nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1),
                                     nn.ReLU(),
                                     nn.MaxPool2d(2, 2)).to(dtype=torch.float64)
         self.stage3 = nn.Sequential(nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
