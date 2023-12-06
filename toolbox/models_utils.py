@@ -3,6 +3,7 @@ import torch.cuda
 from models.SalClass.SalClass_BruteFussion import *
 from models.SalClass.SalClass_EmbedFusion import *
 from models.SalClass.SalClass_CrossModal import *
+from models.SalClass.parts.vision_transformer import vit_base
 from tqdm import tqdm
 import datetime
 
@@ -28,13 +29,14 @@ def load_model(model_name, args):
             print(f'File {ckpt_file} not found')
             print(f'Checkpoint for model: {model_name}, trained in dataset: {args["dataset"]} not found!')
             print('The model will be loaded FROM SCRATCH')
-    model.double()
+
+    model.to(args['dtype'])
     print(f'Size of the architecture: {sum(p.numel() for p in model.parameters())} parameters')
 
-    if torch.cuda.is_available():
-        return torch.compile(model)
-    else:
-        return model
+    model.to(args['device'])
+    print("The model will be running on", args['device'], "device")
+
+    return model
 
 
 def save_model(model, args):
@@ -62,8 +64,23 @@ def evaluation(model, val_loader, metric):
         for images, saliencies, labels in tqdm(val_loader):
             images, saliencies, labels = images.to(device), saliencies.to(device), labels.to(device)
             pred = model(images, saliencies)
+            labels_parsed = labels.argmax(dim=1)
+            metric.update(pred, labels_parsed)
 
-            # labels, pred = labels.argmax(dim=1), pred.argmax(dim=1)
+    result = metric.compute()
+    return result.detach().item()
+
+
+def evaluation_normal_classificator(model, val_loader, metric):
+    print('Evaluating model...')
+    metric.reset()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.eval()
+
+    with torch.no_grad():
+        for images, labels in tqdm(val_loader):
+            images, labels = images.to(device), labels.to(device)
+            pred = model(images)
             labels_parsed = labels.argmax(dim=1)
             metric.update(pred, labels_parsed)
 
