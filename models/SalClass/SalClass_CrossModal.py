@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from models.SalClass.parts.crossmod_vit import CrossModal_ViT
+from toolbox.utils import test_inference
 
 
 class SalClass(nn.Module):
@@ -29,11 +30,16 @@ def SalClass_crossmod_mode2(args):
 
 
 if __name__ == '__main__':
-    args = {'img_size': 384, 'dropout': 0.001}
-    model = SalClass_crossmod_mode2(args)
+    dtype = torch.float64
+    mode = 'mode_1'
+    x1 = torch.randn(1, 3, 384, 384).to(dtype)
+    x2 = torch.randn(1, 1, 384, 384).to(dtype)
+    model = SalClass(img_size=384, dropout=0.001, cm_mode=mode)
+    model.to(dtype)
 
-    img = torch.randn(1, 3, 384, 384)
-    sal = torch.randn(1, 1, 384, 384)
-
-    y = model(img, sal)
+    y = model(x1, x2)
     print(y.shape)
+
+    test = True
+    if test:
+        test_inference(model, img_size=384, dtype=dtype)

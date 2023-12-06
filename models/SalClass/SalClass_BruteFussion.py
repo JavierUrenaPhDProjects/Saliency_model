@@ -3,6 +3,8 @@ from torch import nn
 from models.SalClass.parts.backbone import brutefusion_backbone
 from models.SalClass.parts.vision_transformer import ViT
 
+from toolbox.utils import test_inference
+
 
 class SalClass(nn.Module):
     def __init__(self, img_size, patch_size=32, channels=4, num_classes=257, dim=768, depth=12, heads=12, mlp_dim=2048,
@@ -24,3 +26,18 @@ class SalClass(nn.Module):
 def SalClass_brute(args):
     model = SalClass(args['img_size'])
     return model
+
+
+if __name__ == '__main__':
+    dtype = torch.float32
+    x1 = torch.randn(1, 3, 384, 384).to(dtype)
+    x2 = torch.randn(1, 1, 384, 384).to(dtype)
+    model = SalClass(img_size=384)
+    model.to(dtype)
+
+    y = model(x1, x2)
+    print(f' Output shape {y.shape}')
+
+    test = True
+    if test:
+        test_inference(model, img_size=384, dtype=dtype)

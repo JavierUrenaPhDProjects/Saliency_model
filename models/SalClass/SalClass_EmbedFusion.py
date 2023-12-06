@@ -2,22 +2,25 @@ import torch
 from torch import nn
 from models.SalClass.parts.backbone import resnet_backbone, medium_cnn
 from models.SalClass.parts.vision_transformer import ViT
+from models.SalClass.parts.backbone import brutefusion_backbone
+
+from toolbox.utils import test_inference
 
 
 class SalClass(nn.Module):
-
     # This model will receive an embedding instead of an image. This means that the shape of the tensor
     # is going to be something like [16, 2048, 12, 12] where 2048 is the embedding dimensionality.
     # If we consider that as an image of 12x12 and 2048 channels we can configure the ViT that way
     def __init__(self, channels=2048, num_classes=257, dim=768, depth=12, heads=12,
-                 mlp_dim=2048, dropout=0.1, emb_dropout=0.1, backbone='resnet'):
+                 mlp_dim=2048, dropout=0.1, emb_dropout=0.1, backbone='resnet', dtype=torch.float64,
+                 relationship='sum'):
         super().__init__()
         self.backbone_type = backbone
-
+        self.relationship = relationship
         if backbone == 'resnet':
             self.emb_shape = 12
             self.patch_size = 1
-            self.backbone = resnet_backbone()
+            self.backbone = resnet_backbone(dtype)
             self.backbone.eval()
             self.common_bb = True
         elif backbone == 'cnn':
@@ -26,10 +29,9 @@ class SalClass(nn.Module):
             self.backbone1 = medium_cnn(n_channels=3)
             self.backbone2 = medium_cnn(n_channels=1)
             self.common_bb = False
-
         self.vit = ViT(self.emb_shape, self.patch_size, num_classes, dim, depth, heads, mlp_dim,
                        channels=channels, dropout=dropout, emb_dropout=emb_dropout)
-        self.vit.double()
+
         self.final = nn.Softmax(dim=1)
 
     def forward(self, x1, x2):
@@ -48,15 +50,14 @@ class SalClass(nn.Module):
             x1 = self.backbone1(x1)
             x2 = self.backbone2(x2)
 
-        x = x1 + x2
-
+        x = x1+ x2
         x = self.vit(x)
         # x = self.final(x)
         return x
 
 
 def SalClass_embedd_resnet(args):
-    model = SalClass(dropout=args['dropout'], backbone='resnet')
+    model = SalClass(dropout=args['dropout'], backbone='resnet', dtype=args['dtype'])
     return model
 
 
@@ -65,23 +66,19 @@ def SalClass_embedd_cnn(args):
     return model
 
 
+# def SalClass_embedd_brutefusion(args):
+
+
 if __name__ == '__main__':
-    x1 = torch.randn(1, 3, 384, 384).double()
-    x2 = torch.randn(1, 1, 384, 384).double()
-    measure_time = True
+    dtype = torch.float32
+    x1 = torch.randn(1, 3, 384, 384).to(dtype)
+    x2 = torch.randn(1, 1, 384, 384).to(dtype)
+    model = SalClass(dropout=0.001, backbone='resnet', dtype=dtype, relationship='concat')
+    model.to(dtype)
 
-    model = SalClass(dropout=0.001, backbone='cnn')
-    with torch.inference_mode():
-        model.eval()
-        y = model(x1, x2)
-        print(f' Output shape {y.shape}')
-        time_array = []
-        if measure_time:
-            import numpy as np
-            import time
+    y = model(x1, x2)
+    print(f' Output shape {y.shape}')
 
-            for i in range(100):  # tome of 20 iterations in inference
-                time_init = time.time()
-                y = model(x1, x2)
-                time_array = np.append(time_array, time.time() - time_init)
-                print(f' Average Inference time over {i} iterations: {np.average(time_array)}')
+    test = True
+    if test:
+        test_inference(model, img_size=384, dtype=dtype)
