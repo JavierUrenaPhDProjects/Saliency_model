@@ -141,11 +141,12 @@ class ViT(nn.Module):
 def vit_base(args, **kwargs):
     model = ViT(image_size=args['img_size'],
                 patch_size=32,
-                num_classes=1,
+                channels=3,
+                num_classes=257,
                 dim=768,
                 depth=12,
                 heads=12,
-                mlp_dim=2048,
+                mlp_dim=3072,
                 dropout=0.1,
                 emb_dropout=0.1)
 
@@ -158,4 +159,4 @@ if __name__ == '__main__':
     x = torch.randn(1, 3, 288, 384)
     y = model(x)
 
-    print(y)
+    print(y.shape)
