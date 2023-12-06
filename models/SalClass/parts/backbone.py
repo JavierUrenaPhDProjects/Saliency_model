@@ -7,9 +7,9 @@ from torchvision.models import resnet50
 
 
 class resnet_backbone(nn.Module):
-    def __init__(self):
+    def __init__(self, dtype=torch.float64):
         super().__init__()
-        self.backbone = resnet50(weights='ResNet50_Weights.DEFAULT').to(dtype=torch.float64)
+        self.backbone = resnet50(weights='ResNet50_Weights.DEFAULT').to(dtype=dtype)
         del self.backbone.fc
         for param in self.backbone.parameters():
             param.requires_grad = False
@@ -36,17 +36,17 @@ class medium_cnn(nn.Module):
                                     nn.ReLU(),
                                     nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(),
-                                    nn.MaxPool2d(2, 2)).to(dtype=torch.float64)
+                                    nn.MaxPool2d(2, 2))
         self.stage2 = nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
                                     nn.ReLU(),
                                     nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1),
                                     nn.ReLU(),
-                                    nn.MaxPool2d(2, 2)).to(dtype=torch.float64)
+                                    nn.MaxPool2d(2, 2))
         self.stage3 = nn.Sequential(nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(),
                                     nn.Conv2d(256, 2048, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(),
-                                    nn.MaxPool2d(kernel_size=3, stride=2, padding=1)).to(dtype=torch.float64)
+                                    nn.MaxPool2d(kernel_size=3, stride=2, padding=1))
 
     def forward(self, xb):
         x = self.stage1(xb)
