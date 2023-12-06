@@ -39,17 +39,13 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
     device = args['device']
     epochs = args['epochs']
 
-    start_logging(args)
-
     AMP_flag = False
     if device != 'cpu':
         import torch
         AMP_flag = True
         scaler = torch.cuda.amp.GradScaler()
 
-    print("The model will be running on", device, "device")
-    model.to(device)
-    print('\nModel pre-evaluation...')
+    print('\n_____Model pre-evaluation_____')
     best_score = evaluation(model, val_loader, metric)
     print(f'Pre-evaluation score: {best_score}')
     tries = 0
@@ -71,12 +67,13 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
             loss_value = loss.detach().item()
             running_loss += loss_value
             loss_array = np.append(loss_array, loss_value)
-            get_batch_loss(args, [loss_value])
 
             if output_batches and i % nBatchesOutput == nBatchesOutput - 1:
+                avg_loss = running_loss / (nBatchesOutput - 1)
                 print(f'Epoch {epoch + 1}, batches {i - (nBatchesOutput - 1)} '
-                      f'to {i} average loss (BCE): {running_loss / (nBatchesOutput - 1)}')
+                      f'to {i} average loss (BCE): {avg_loss}')
                 # zero the loss
+                get_batch_loss(args, [avg_loss])
                 running_loss = 0.0
 
         eval_score = evaluation(model, val_loader, metric)
@@ -89,10 +86,9 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
             tries = 0
         else:
             tries += 1
+            scheduler.step()
         if tries > max_tries:
             break
-        elif tries > 0:
-            scheduler.step()
 
 
 if __name__ == '__main__':
@@ -104,6 +100,7 @@ if __name__ == '__main__':
     train_loader, val_loader = create_dataloader(dataset, args)
 
     model = load_model(model_name=args['model'], args=args)
+
     loss_fn = nn.CrossEntropyLoss()
     metric = MulticlassAUROC(num_classes=257)
     optimizer = optim.SGD(model.parameters(), lr=args['lr'], momentum=0.9, weight_decay=args['weight_decay'])
@@ -115,7 +112,8 @@ if __name__ == '__main__':
     print('\n---------------------\nDataset information\n---------------------')
     print(f'Training model on dataset: {args["dataset"]}'
           f'\nDataset size: {dataset.__len__()}'
-          f'\nData dimensions: {dataset.__getitem__(0)[0].shape}')
+          f'\nData dimensions: {dataset.__getitem__(0)[0].shape}'
+          f'\nData type: {dataset.__getitem__(0)[0].dtype}')
     print('\n---------------------\nTraining parameters\n---------------------')
     print(f'Train size: {int(dataset.__len__() * args["train_percnt"])}'
           f'\nValidation size: {int(dataset.__len__() - dataset.__len__() * args["train_percnt"])}'
@@ -123,4 +121,6 @@ if __name__ == '__main__':
           f'\nLearning rate: {args["lr"]}'
           f'\nNumber of epochs: {args["epochs"]}')
     print('---------------------')
+
+    start_logging(args)
     train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args)
