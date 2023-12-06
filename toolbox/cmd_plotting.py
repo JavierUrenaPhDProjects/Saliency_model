@@ -5,7 +5,7 @@ import time
 
 clearscreen = lambda: os.system('clear')
 modelname = 'SalClass_embedd'
-n = 10
+n = 1
 
 
 def check_change(new_arr, old_arr):
@@ -29,6 +29,6 @@ try:
         else:
             pass
         old_arr = new_arr
-        time.sleep(1)
+        time.sleep(5)
 except KeyboardInterrupt:
     pass
