@@ -4,6 +4,7 @@ import nni
 from nni.utils import merge_parameter
 import logging
 import datetime
+import torch
 
 
 def str2bool(v):
@@ -19,7 +20,7 @@ def str2bool(v):
 
 
 def select_dataset(dataset):
-    if dataset == 'CALTECH256':
+    if dataset == 'CALTECH256' or dataset == 'CALTECH256_classification':
         datasetpath = 'CALTECH256'
 
     else:
@@ -28,8 +29,17 @@ def select_dataset(dataset):
     return datasetpath
 
 
+def select_dtype(data_type):
+    if data_type == 'float32':
+        dtype = torch.float32
+        torch.set_float32_matmul_precision("high")
+    elif data_type == 'float64' or data_type == 'double':
+        dtype = torch.float64
+    return dtype
+
+
 parser = argparse.ArgumentParser('Training arguments')
-parser.add_argument('--dataset', default='CALTECH256', type=str)
+parser.add_argument('--dataset', default='CALTECH256_classification', type=str)
 dataset = parser.parse_known_args()[0].dataset
 
 if 'c703i' in os.uname()[1]:
@@ -44,9 +54,12 @@ else:
 
 # DATASET PARAMETERS #
 parser.add_argument('--dataset_path', default=data_path, type=str)
+parser.add_argument('--data_type', default='float32', type=str)
+dtype = parser.parse_known_args()[0].data_type
+parser.add_argument('--dtype', default=select_dtype(dtype))
 
 # TRAINING PARAMETERS #
-parser.add_argument('--lr', default=0.001, type=float)
+parser.add_argument('--lr', default=0.0001, type=float)
 parser.add_argument('--weight_decay', default=0.0001, type=float)
 parser.add_argument('--batch_size', default=2, type=int)
 parser.add_argument('--train_percnt', default=0.8, type=float)
@@ -54,7 +67,7 @@ parser.add_argument('--epochs', default=20, type=int)
 parser.add_argument('--date', default=datetime.date.today().strftime("%d-%m-%Y"), type=str)
 
 # MODEL PARAMETERS #
-parser.add_argument('--model', default='SalClass_embedd', type=str)
+parser.add_argument('--model', default='vit_base', type=str)
 parser.add_argument('--img_size', default=384, type=int)
 parser.add_argument('--pretrain', default=False, type=str2bool)
 parser.add_argument('--dropout', default=0.0001, type=float)
