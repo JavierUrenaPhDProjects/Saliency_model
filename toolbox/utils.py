@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import cv2
+import time
 
 
 def set_seed(seed=1000):
@@ -67,14 +68,21 @@ def start_logging(args):
     date = args['date']
     dataset = args['dataset']
 
-    logs_path = os.path.join("trained_models", model_name, "logs")
+    model_path = os.path.join("trained_models", model_name)
+    logs_path = os.path.join(model_path, "logs")
     log_filename = f"{model_name}_{dataset}_{date}.csv"
     filepath = os.path.join(logs_path, log_filename)
+    losspath = os.path.join(logs_path, 'loss.npy')
 
+    if not os.path.exists(model_path):
+        os.mkdir(model_path)
     if not os.path.exists(logs_path):
         os.mkdir(logs_path)
-    elif os.path.exists(filepath):
+    if os.path.exists(filepath):
         os.remove(filepath)
+    if os.path.exists(losspath):
+        os.remove(losspath)
+
     log_df = pd.DataFrame({'epoch': [], 'loss': [], 'eval_score': []})
     log_df.to_csv(filepath, index=False)
 
@@ -111,3 +119,16 @@ def get_batch_loss(args, loss):
         np.save(filepath, [])
     loss_array = np.load(filepath)
     np.save(filepath, np.append(loss_array, loss))
+
+
+def test_inference(model, img_size=384, dtype=torch.float64):
+    with torch.inference_mode():
+        time_array = []
+        for i in range(100):  # will measure the average time along 100 iterations
+            x1 = torch.randn(1, 3, img_size, img_size).to(dtype)  # RGB image
+            x2 = torch.randn(1, 1, img_size, img_size).to(dtype)  # Saliency map
+
+            time_init = time.time()
+            _ = model(x1, x2)
+            time_array = np.append(time_array, time.time() - time_init)
+            print(f' Average Inference time over {i} iterations: {np.average(time_array)}')
