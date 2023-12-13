@@ -3,7 +3,7 @@ import numpy as np
 from toolbox.config import load_args
 from toolbox.dataloader import create_dataloader, create_dataset
 from toolbox.models_utils import load_model, save_model, evaluation
-from toolbox.utils import set_seed, start_logging, save_log, get_batch_loss
+from toolbox.utils import set_seed, start_logging, save_log, get_batch_loss, activate_AMP
 from torch import nn, autocast
 from torcheval.metrics import MulticlassAUROC
 from tqdm import tqdm
@@ -12,6 +12,7 @@ import torch.optim as optim
 
 # Definition of training steps:
 
+# Normal training step
 def step(x1, x2, gt, model, optimizer, loss_fn):
     optimizer.zero_grad(set_to_none=True)
     outputs = model(x1, x2)
@@ -21,6 +22,7 @@ def step(x1, x2, gt, model, optimizer, loss_fn):
     return loss
 
 
+# Automatic Mixed Precission training step
 def AMP_step(x1, x2, gt, model, optimizer, loss_fn, scaler):
     optimizer.zero_grad(set_to_none=True)
     with autocast(device_type='cuda'):
@@ -32,6 +34,23 @@ def AMP_step(x1, x2, gt, model, optimizer, loss_fn, scaler):
     return loss
 
 
+# Configure learning rate scheduler:
+def lr_scheduler(optimizer, args, data_len, mode='triangular2', n_cycles=5):
+    if args['lr_scheduler']:
+        n_epochs = args['epochs']
+        batch_size = args['batch_size']
+        data_size = int(data_len * args["train_percnt"])
+
+        iter_per_epoch = data_size // batch_size
+        max_iter = n_epochs * iter_per_epoch
+
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=args['lr'], max_lr=args['lr'] * 4, mode=mode,
+                                                step_size_up=max_iter // (n_cycles * 2))
+    else:
+        scheduler = None
+    return scheduler
+
+
 # Training script:
 
 def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args, output_batches=True,
@@ -39,11 +58,7 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
     device = args['device']
     epochs = args['epochs']
 
-    AMP_flag = False
-    if device != 'cpu':
-        import torch
-        AMP_flag = True
-        scaler = torch.cuda.amp.GradScaler()
+    AMP_flag, scaler = activate_AMP(device)
 
     print('\n_____Model pre-evaluation_____')
     best_score = evaluation(model, val_loader, metric)
@@ -68,10 +83,13 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
             running_loss += loss_value
             loss_array = np.append(loss_array, loss_value)
 
+            if args['lr_scheduler']:
+                scheduler.step()
+
             if output_batches and i % nBatchesOutput == nBatchesOutput - 1:
                 avg_loss = running_loss / (nBatchesOutput - 1)
                 print(f'Epoch {epoch + 1}, batches {i - (nBatchesOutput - 1)} '
-                      f'to {i} average loss (BCE): {avg_loss}')
+                      f'to {i} average loss (Cross Entropy Loss): {avg_loss}')
                 # zero the loss
                 get_batch_loss(args, [avg_loss])
                 running_loss = 0.0
@@ -86,7 +104,6 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
             tries = 0
         else:
             tries += 1
-            scheduler.step()
         if tries > max_tries:
             break
 
@@ -102,9 +119,10 @@ if __name__ == '__main__':
     model = load_model(model_name=args['model'], args=args)
 
     loss_fn = nn.CrossEntropyLoss()
-    metric = MulticlassAUROC(num_classes=257)
+    metric = MulticlassAUROC(num_classes=dataset.num_classes)
     optimizer = optim.SGD(model.parameters(), lr=args['lr'], momentum=0.9, weight_decay=args['weight_decay'])
-    scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=args['lr'], max_lr=0.1)
+
+    scheduler = lr_scheduler(optimizer, args, dataset.__len__())
 
     print('\n---------------------\nTraining model\n---------------------')
     print(f'Model: {args["model"]}'
