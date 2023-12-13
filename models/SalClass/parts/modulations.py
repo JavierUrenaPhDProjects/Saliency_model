@@ -87,7 +87,9 @@ class FeaturePyramidsModulation(ModulationLayer):
     """
      Involves upsampling the salience features to match the spatial dimensions of the RGB features, concatenating
      both feature maps along the channel dimension, and then using a 1x1 convolution to combine them into a single
-     feature map with the original channel size
+     feature map with the original channel size.
+
+     NOTE: In prior this modulation layer would behave exactly the same as "ConcatConvModulation"
     """
 
     def __init__(self, embedd_dim=(2048, 12, 12)):
