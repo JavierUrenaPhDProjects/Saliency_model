@@ -32,6 +32,17 @@ def set_seed(seed=1000):
         pass
 
 
+def activate_AMP(device):
+    if device != 'cpu':
+        AMP_flag = True
+        scaler = torch.cuda.amp.GradScaler()
+    else:
+        AMP_flag = False
+        scaler = None
+
+    return AMP_flag, scaler
+
+
 def preprocess_img(img_dir, channels=3):
     if channels == 1:
         img = cv2.imread(img_dir, 0)
