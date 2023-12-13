@@ -100,38 +100,38 @@ def SalClass_embedd_deep_CNN(args):
 # 2) Medium depth | Different kinds of modulations
 
 def Salclass_embedd_cnn_AdditiveModulation(args):
-    # This architecture is the same as "SalClass_embedd_medium_CNN"
-    model = SalClass(dropout=args['dropout'], backbone='medium_CNN', modulation='AdditiveModulation')
+    # This architecture is the same as "SalClass_embedd_shallow_CNN"
+    model = SalClass(dropout=args['dropout'], backbone='shallow_CNN', modulation='AdditiveModulation')
     return model
 
 
 def Salclass_embedd_cnn_MultiplicativeModulation(args):
-    model = SalClass(dropout=args['dropout'], backbone='medium_CNN', modulation='MultiplicativeModulation')
+    model = SalClass(dropout=args['dropout'], backbone='shallow_CNN', modulation='MultiplicativeModulation')
     return model
 
 
 def Salclass_embedd_cnn_OriginalModulation(args):
-    model = SalClass(dropout=args['dropout'], backbone='medium_CNN', modulation='OriginalModulation')
+    model = SalClass(dropout=args['dropout'], backbone='shallow_CNN', modulation='OriginalModulation')
     return model
 
 
 def Salclass_embedd_cnn_ConcatConvModulation(args):
-    model = SalClass(dropout=args['dropout'], backbone='medium_CNN', modulation='ConcatConvModulation')
+    model = SalClass(dropout=args['dropout'], backbone='shallow_CNN', modulation='ConcatConvModulation')
     return model
 
 
 def Salclass_embedd_cnn_SaliencyGuidedModulation(args):
-    model = SalClass(dropout=args['dropout'], backbone='medium_CNN', modulation='SaliencyGuidedModulation')
+    model = SalClass(dropout=args['dropout'], backbone='shallow_CNN', modulation='SaliencyGuidedModulation')
     return model
 
 
 def Salclass_embedd_cnn_FeaturePyramidsModulation(args):
-    model = SalClass(dropout=args['dropout'], backbone='medium_CNN', modulation='FeaturePyramidsModulation')
+    model = SalClass(dropout=args['dropout'], backbone='shallow_CNN', modulation='FeaturePyramidsModulation')
     return model
 
 
 def Salclass_embedd_cnn_SqueezeExcitationModulation(args):
-    model = SalClass(dropout=args['dropout'], backbone='medium_CNN', modulation='SqueezeExcitationModulation')
+    model = SalClass(dropout=args['dropout'], backbone='shallow_CNN', modulation='SqueezeExcitationModulation')
     return model
 
 
