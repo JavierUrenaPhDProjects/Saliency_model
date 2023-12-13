@@ -54,7 +54,7 @@ def lr_scheduler(optimizer, args, data_len, mode='triangular2', n_cycles=5):
 # Training script:
 
 def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args, output_batches=True,
-          nBatchesOutput=100, max_tries=10):
+          nBatchesOutput=100, patience=10):
     device = args['device']
     epochs = args['epochs']
 
@@ -62,9 +62,10 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
 
     print('\n_____Model pre-evaluation_____')
     best_score = evaluation(model, val_loader, metric)
-    print(f'Pre-evaluation score: {best_score}')
+    print(f'\nPre-evaluation score: {best_score}')
     tries = 0
 
+    print(f'\nPatience of the training: {patience}')
     for epoch in range(epochs):
         print(f'\nCurrent Learning Rate of the training: {optimizer.param_groups[0]["lr"]}')
         model.train()
@@ -104,7 +105,7 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
             tries = 0
         else:
             tries += 1
-        if tries > max_tries:
+        if tries > patience:
             break
 
 
@@ -141,4 +142,5 @@ if __name__ == '__main__':
     print('---------------------')
 
     start_logging(args)
-    train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args)
+    train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler, args,
+          patience=int(args['epochs'] * 0.1))
