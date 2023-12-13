@@ -39,7 +39,7 @@ def select_dtype(data_type):
 
 
 parser = argparse.ArgumentParser('Training arguments')
-parser.add_argument('--dataset', default='CALTECH256_classification', type=str)
+parser.add_argument('--dataset', default='CALTECH256', type=str)
 dataset = parser.parse_known_args()[0].dataset
 
 if 'c703i' in os.uname()[1]:
@@ -61,13 +61,14 @@ parser.add_argument('--dtype', default=select_dtype(dtype))
 # TRAINING PARAMETERS #
 parser.add_argument('--lr', default=0.0001, type=float)
 parser.add_argument('--weight_decay', default=0.0001, type=float)
-parser.add_argument('--batch_size', default=2, type=int)
+parser.add_argument('--batch_size', default=8, type=int)
 parser.add_argument('--train_percnt', default=0.8, type=float)
 parser.add_argument('--epochs', default=20, type=int)
 parser.add_argument('--date', default=datetime.date.today().strftime("%d-%m-%Y"), type=str)
+parser.add_argument('--lr_scheduler', default=True, type=str2bool)
 
 # MODEL PARAMETERS #
-parser.add_argument('--model', default='vit_base', type=str)
+parser.add_argument('--model', default='Salclass_embedd_cnn_modulated', type=str)
 parser.add_argument('--img_size', default=384, type=int)
 parser.add_argument('--pretrain', default=False, type=str2bool)
 parser.add_argument('--dropout', default=0.0001, type=float)
