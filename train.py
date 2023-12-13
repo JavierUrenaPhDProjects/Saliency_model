@@ -65,7 +65,6 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
     print(f'\nPre-evaluation score: {best_score}')
     tries = 0
 
-    print(f'\nPatience of the training: {patience}')
     for epoch in range(epochs):
         print(f'\nCurrent Learning Rate of the training: {optimizer.param_groups[0]["lr"]}')
         model.train()
@@ -138,7 +137,9 @@ if __name__ == '__main__':
           f'\nValidation size: {int(dataset.__len__() - dataset.__len__() * args["train_percnt"])}'
           f'\nBatch size: {args["batch_size"]}'
           f'\nLearning rate: {args["lr"]}'
-          f'\nNumber of epochs: {args["epochs"]}')
+          f'\nNumber of epochs: {args["epochs"]}'
+          f'\nPatience: {int(args["epochs"] * 0.1)}'
+          )
     print('---------------------')
 
     start_logging(args)
