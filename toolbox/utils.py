@@ -123,6 +123,7 @@ def save_log(args, epoch, loss_array, eval_scor, eval_loss):
     new_log = pd.DataFrame(log_dict, index=[0])
     log_df = log_df._append(new_log, ignore_index=True)
     log_df.to_csv(filepath, index=False)
+    log_df.to_csv(os.path.join(logs_path, "last_log.csv"), index=False)
 
 
 def get_batch_loss(args, loss):
