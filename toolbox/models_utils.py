@@ -54,35 +54,46 @@ def save_model(model, args):
     torch.save(model.state_dict(), f"{path}/last_trained_{name}_{dataset}.pth")
 
 
-def evaluation(model, val_loader, metric):
+def evaluation(model, val_loader, loss_fn, metric):
     print('Evaluating model...')
     metric.reset()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.eval()
+    cum_loss = 0
 
     with torch.no_grad():
         for images, saliencies, labels in tqdm(val_loader):
+            # Prepare data and give it to the model
             images, saliencies, labels = images.to(device), saliencies.to(device), labels.to(device)
             pred = model(images, saliencies)
+            # Measure the loss and metric from the predictions
+            loss = loss_fn(pred, labels)
+            cum_loss += loss.detach().item()
             labels_parsed = labels.argmax(dim=1)
             metric.update(pred, labels_parsed)
 
-    result = metric.compute()
-    return result.detach().item()
+    val_score = metric.compute()
+    val_loss = cum_loss / len(val_loader)
+    return val_score.detach().item(), val_loss
 
 
-def evaluation_normal_classificator(model, val_loader, metric):
+def evaluation_normal_classificator(model, val_loader, loss_fn, metric):
     print('Evaluating model...')
     metric.reset()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.eval()
+    cum_loss = 0
 
     with torch.no_grad():
         for images, labels in tqdm(val_loader):
             images, labels = images.to(device), labels.to(device)
             pred = model(images)
+
+            loss = loss_fn(pred, labels)
+            cum_loss += loss.detach().item()
             labels_parsed = labels.argmax(dim=1)
             metric.update(pred, labels_parsed)
 
-    result = metric.compute()
-    return result.detach().item()
+    val_score = metric.compute()
+    val_loss = cum_loss / len(val_loader)
+    return val_score.detach().item(), val_loss
