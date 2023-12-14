@@ -61,8 +61,8 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
     AMP_flag, scaler = activate_AMP(device)
 
     print('\n_____Model pre-evaluation_____')
-    best_score = evaluation(model, val_loader, metric)
-    print(f'\nPre-evaluation score: {best_score}')
+    best_score, best_loss = evaluation(model, val_loader, loss_fn, metric)
+    print(f'\nPre-evaluation score: {best_score} | Pre-evaluation loss: {best_loss}')
     tries = 0
 
     for epoch in range(epochs):
@@ -94,9 +94,9 @@ def train(model, train_loader, val_loader, loss_fn, metric, optimizer, scheduler
                 get_batch_loss(args, [avg_loss])
                 running_loss = 0.0
 
-        eval_score = evaluation(model, val_loader, metric)
-        print(f'Epoch {epoch + 1}, | Area Under ROC {eval_score}')
-        save_log(args, epoch, loss_array, eval_score)
+        eval_score, eval_loss = evaluation(model, val_loader, loss_fn, metric)
+        print(f'Epoch {epoch + 1} | Area Under ROC: {eval_score} | Evaluation loss: {eval_loss}')
+        save_log(args, epoch, loss_array, eval_score, eval_loss)
 
         if eval_score > best_score:
             save_model(model, args)
@@ -126,6 +126,7 @@ if __name__ == '__main__':
 
     print('\n---------------------\nTraining model\n---------------------')
     print(f'Model: {args["model"]}'
+          f'\nParameters of the model: {sum(p.numel() for p in model.parameters())}'
           f'\nPre-trained: {args["pretrain"]}')
     print('\n---------------------\nDataset information\n---------------------')
     print(f'Training model on dataset: {args["dataset"]}'
