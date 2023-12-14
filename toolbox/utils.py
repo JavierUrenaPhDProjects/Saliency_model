@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import cv2
 import time
+import shutil
 
 
 def set_seed(seed=1000):
@@ -92,21 +93,23 @@ def start_logging(args):
     if os.path.exists(filepath):
         os.remove(filepath)
     if os.path.exists(losspath):
+        shutil.copy(losspath, os.path.join(logs_path, 'loss_old.npy'))
         os.remove(losspath)
 
-    log_df = pd.DataFrame({'epoch': [], 'loss': [], 'eval_score': []})
+    log_df = pd.DataFrame({'epoch': [], 'train_loss': [], 'eval_score': [], 'eval_loss': []})
     log_df.to_csv(filepath, index=False)
 
 
-def get_epoch_log(epoch, loss_array, eval_score):
+def get_epoch_log(epoch, loss_array, eval_score, eval_loss):
     log_dict = {'epoch': epoch,
-                'loss': np.average(loss_array),
-                'eval_score': eval_score}
+                'train_loss': np.average(loss_array),
+                'eval_score': eval_score,
+                'eval_loss': eval_loss}
     return log_dict
 
 
-def save_log(args, epoch, loss_array, eval_scor):
-    log_dict = get_epoch_log(epoch, loss_array, eval_scor)
+def save_log(args, epoch, loss_array, eval_scor, eval_loss):
+    log_dict = get_epoch_log(epoch, loss_array, eval_scor, eval_loss)
 
     model_name = args['model']
     date = args['date']
@@ -125,7 +128,7 @@ def save_log(args, epoch, loss_array, eval_scor):
 def get_batch_loss(args, loss):
     model_name = args['model']
     logs_path = os.path.join("trained_models", model_name, "logs")
-    filepath = os.path.join(logs_path, 'loss.npy')
+    filepath = os.path.join(logs_path, 'last_training_loss.npy')
     if not os.path.exists(filepath):
         np.save(filepath, [])
     loss_array = np.load(filepath)
